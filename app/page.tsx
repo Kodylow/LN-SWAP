@@ -1,52 +1,56 @@
 "use client";
 
 import Container from "@/components/container";
+import {
+  WebLNProvider,
+  useWebLNContext,
+} from "@/components/providers/webln-provider";
+import { Button } from "@/components/ui/button";
 import Icon from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
-import Link from "next/link";
+import Swap from "./swap";
+
+function Fallback() {
+  const { isLoading, error } = useWebLNContext();
+
+  if (isLoading) {
+    return (
+      <Container center>
+        <Icon
+          icon="IconLoader2"
+          size="xl"
+          className="animate-load text-lightGrey"
+        />
+        <Text>Initializing WebLN...</Text>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container center>
+        <Text variant="h2" weight="bold" className="text-center">
+          WebLN Provider Required
+        </Text>
+        <Text className="text-center">
+          A WebLN Provider is required in order to run this application.{" "}
+        </Text>
+        <Button onClick={() => window.location.reload()}>Reload</Button>
+      </Container>
+    );
+  }
+
+  return (
+    <Container className="divide-y divide-y-extraLightGrey items-stretch p-md">
+      <Swap />
+    </Container>
+  );
+}
 
 export default function Index() {
   return (
-    <Container>
-      <Text variant="h1" weight="bolder" className="text-center">
-        Fedi Mod Boilerplate
-      </Text>
-
-      <Text className="text-center">
-        Beautiful components • Nostr & Lightning Utilities
-      </Text>
-
-      <Text>
-        <ul className="flex flex-col gap-md">
-          <li>
-            <Link
-              href="/playground"
-              className="text-grey inline-flex gap-sm items-center"
-            >
-              <span>Component Playground</span>
-              <Icon icon="IconChevronRight" />
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/webln"
-              className="text-grey inline-flex gap-sm items-center"
-            >
-              <span>WebLN Example</span>
-              <Icon icon="IconChevronRight" />
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/nostr"
-              className="text-grey inline-flex gap-sm items-center"
-            >
-              <span>Nostr Example</span>
-              <Icon icon="IconChevronRight" />
-            </Link>
-          </li>
-        </ul>
-      </Text>
-    </Container>
+    <WebLNProvider>
+      <Fallback />
+    </WebLNProvider>
   );
 }
