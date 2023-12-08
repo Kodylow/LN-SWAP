@@ -71,8 +71,7 @@ export default function Receive({
 
             if (res.error) {
               toast({
-                title: "Error",
-                description: res.error,
+                content: res.error,
               });
             } else {
               setOpen(true);
@@ -84,8 +83,7 @@ export default function Receive({
             }
           } catch (e) {
             toast({
-              title: "Error",
-              description: (e as any).message,
+              content: (e as any).message,
             });
           }
         }
@@ -96,7 +94,7 @@ export default function Receive({
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       toast({
-        description: "Copied!",
+        content: "Copied!",
         duration: 1500,
       });
     });
