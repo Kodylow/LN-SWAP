@@ -1,4 +1,4 @@
-import { shitcoins } from "@/lib/constants";
+import { tokens } from "@/lib/constants";
 import { NextResponse } from "next/server";
 import fetchWithFF from "../utils";
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   }).then((r) => r.json());
 
   const addr = data.data.from.address;
-  const contractAddr = shitcoins.find((x) => x.code === body.from);
+  const contractAddr = tokens.find((x) => x.code === body.from);
   const amount = Number(data.data.from.amount);
 
   if (addr && contractAddr && amount) {

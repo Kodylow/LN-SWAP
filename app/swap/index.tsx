@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Send from "./send";
 import Receive from "./receive";
-import { Shitcoin, shitcoins } from "@/lib/constants";
+import { Token, tokens } from "@/lib/constants";
 import { Status, statuses } from "../types";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -17,7 +17,7 @@ import { Text } from "@/components/ui/text";
 import Image from "next/image";
 
 export interface RateInfo {
-  code: Shitcoin;
+  code: Token;
   rate: number;
   min: number;
   max: number;
@@ -30,7 +30,7 @@ export interface Rate {
 
 export default function Swap() {
   const [tab, setTab] = useState<"send" | "receive">("send");
-  const [shitcoin, setShitcoin] = useState<Shitcoin>(shitcoins[0].code);
+  const [token, setToken] = useState<Token>(tokens[0].code);
   const [order, setOrder] = useState<{
     token: string;
     id: string;
@@ -38,11 +38,11 @@ export default function Swap() {
   const [status, setStatus] = useState(Status.NEW);
 
   const { data } = useQuery<Rate>({
-    queryKey: ["prices", { tab, shitcoin }],
+    queryKey: ["prices", { tab, token }],
     queryFn: async () => {
       const res = await fetch(
-        `/api/rate?from=${tab === "send" ? "BTC" : shitcoin}&to=${
-          tab === "send" ? shitcoin : "BTC"
+        `/api/rate?from=${tab === "send" ? "BTC" : token}&to=${
+          tab === "send" ? token : "BTC"
         }`,
       )
         .then((r) => r.json())
@@ -88,7 +88,7 @@ export default function Swap() {
   }, [order]);
 
   return (
-    <div className="flex flex-col gap-sm items-center">
+    <div className="flex flex-col gap-sm items-center h-full grow">
       <div className="flex w-full bg-extraLightGrey rounded-lg p-xs">
         <button
           className={`grow basis-0 rounded-md text-base px-md py-sm ${
@@ -109,16 +109,16 @@ export default function Swap() {
       </div>
 
       <div className="flex gap-sm flex-col w-full">
-        <Label htmlFor="shitcoin">Shitcoin / Cryptocurrency (same thing)</Label>
+        <Label htmlFor="token">Token</Label>
         <Select
-          onValueChange={(value) => setShitcoin(value as Shitcoin)}
-          defaultValue={shitcoin}
+          onValueChange={(value) => setToken(value as Token)}
+          defaultValue={token}
         >
-          <SelectTrigger id="shitcoin">
+          <SelectTrigger id="token">
             <SelectValue placeholder="Select cryptocurrency" />
           </SelectTrigger>
           <SelectContent className="flex flex-col">
-            {shitcoins.map((coin, i) => (
+            {tokens.map((coin, i) => (
               <SelectItem
                 key={i}
                 value={coin.code}
@@ -145,9 +145,9 @@ export default function Swap() {
       </div>
 
       {tab === "send" ? (
-        <Send rate={data} setOrder={setOrder} shitcoin={shitcoin} />
+        <Send rate={data} setOrder={setOrder} token={token} />
       ) : (
-        <Receive rate={data} setOrder={setOrder} shitcoin={shitcoin} />
+        <Receive rate={data} setOrder={setOrder} token={token} />
       )}
 
       {order ? (

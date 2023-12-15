@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Rate } from ".";
-import { Shitcoin } from "@/lib/constants";
+import { Token } from "@/lib/constants";
 import { useToast } from "@/components/ui/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,11 +22,11 @@ const FormSchema = z.object({
 export default function Receive({
   rate,
   setOrder,
-  shitcoin,
+  token,
 }: {
   rate?: Rate;
   setOrder: Dispatch<SetStateAction<{ token: string; id: string } | null>>;
-  shitcoin: Shitcoin;
+  token: Token;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -44,8 +44,8 @@ export default function Receive({
       if (typeof window.webln !== "undefined") {
         await window.webln.enable();
 
-        const rates = await fetch(`/api/rate?from=${shitcoin}&to=BTC`).then(
-          (r) => r.json(),
+        const rates = await fetch(`/api/rate?from=${token}&to=BTC`).then((r) =>
+          r.json(),
         );
 
         if (rates) {
@@ -59,7 +59,7 @@ export default function Receive({
             const res = await fetch("/api/receive", {
               method: "POST",
               body: JSON.stringify({
-                from: shitcoin,
+                from: token,
                 amount: sats,
                 address: paymentRequest,
               }),
@@ -111,14 +111,14 @@ export default function Receive({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data) => mutate(data))}
-          className="flex flex-col gap-4 w-full grow items-stretch"
+          className="flex flex-col gap-4 w-full grow items-stretch grow"
         >
           <FormField
             control={form.control}
             name="amount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Amount ({shitcoin})</FormLabel>
+                <FormLabel>Amount ({token})</FormLabel>
                 <Input
                   value={String(field.value)}
                   onChange={(e) => field.onChange(Number(e.target.value))}
@@ -129,13 +129,15 @@ export default function Receive({
                   step="any"
                 />
                 <span className="text-xs text-muted-foreground">
-                  + Swap Fee: {(field.value / 100).toFixed(3)} {shitcoin}
+                  + Swap Fee: {(field.value / 100).toFixed(3)} {token}
                 </span>
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="grow" loading={status === "pending"}>
+          <div className="grow" />
+
+          <Button type="submit" loading={status === "pending"}>
             {" "}
             Submit
           </Button>
@@ -181,7 +183,7 @@ export default function Receive({
                         icon="IconCopy"
                         className="w-3 h-3 inline shrink-0"
                       />{" "}
-                      {data.data.amount} {shitcoin}
+                      {data.data.amount} {token}
                     </span>{" "}
                     to the{" "}
                     <span
@@ -233,7 +235,7 @@ export default function Receive({
 
             <div className="flex gap-2 items-center">
               <Checkbox checked={invoiceUri} onChange={setInvoiceUri} />{" "}
-              <span className="text-sm">Shitcoin URI</span>
+              <span className="text-sm">Token URI</span>
             </div>
           </div>
         ) : null}

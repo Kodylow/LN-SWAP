@@ -41,7 +41,7 @@ function Fallback() {
   }
 
   return (
-    <Container className="divide-y divide-y-extraLightGrey items-stretch p-md">
+    <Container className="h-full items-stretch p-md grow">
       <Swap />
     </Container>
   );

@@ -6,7 +6,7 @@ export const RELAYS = ["wss://relay.snort.social", "wss://nos.lol"];
  */
 export const invoiceVerificationTimeout = 3600000;
 
-export const shitcoins = [
+export const tokens = [
   {
     code: "USDCETH",
     contract_address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -37,4 +37,4 @@ export const shitcoins = [
   },
 ];
 
-export type Shitcoin = (typeof shitcoins)[number]["code"];
+export type Token = (typeof tokens)[number]["code"];

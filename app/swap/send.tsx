@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Shitcoin } from "@/lib/constants";
+import { Token } from "@/lib/constants";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
@@ -22,11 +22,11 @@ const FormSchema = z.object({
 export default function Send({
   rate,
   setOrder,
-  shitcoin,
+  token,
 }: {
   rate?: Rate;
   setOrder: Dispatch<SetStateAction<{ token: string; id: string } | null>>;
-  shitcoin: Shitcoin;
+  token: Token;
 }) {
   const [scanning, setScanning] = useState(false);
   const { toast } = useToast();
@@ -44,7 +44,7 @@ export default function Send({
       const { data, error } = await fetch("/api/send", {
         method: "POST",
         body: JSON.stringify({
-          to: shitcoin,
+          to: token,
           amount: fields.amount / 100000000,
           address: fields.address,
         }),
@@ -107,7 +107,7 @@ export default function Send({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className="flex flex-col gap-4 w-full grow items-stretch"
+        className="flex flex-col gap-4 w-full grow items-stretch grow"
       >
         <FormField
           control={form.control}
@@ -169,6 +169,8 @@ export default function Send({
             </FormItem>
           )}
         />
+
+        <div className="grow" />
 
         <Button type="submit" loading={mutation.status === "pending"}>
           Submit

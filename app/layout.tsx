@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Swap",
-  description: "Shitcoin <> Bitcoin swapping",
+  description: "Swap crypto tokens for sats",
   icons: {
     icon: "/favicon.ico",
   },
