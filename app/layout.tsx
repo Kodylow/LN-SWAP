@@ -1,7 +1,8 @@
 import QueryClientProvider from "@/components/providers/query-client-provider";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@fedibtc/ui";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import "@fedibtc/ui/dist/index.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

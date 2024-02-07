@@ -1,14 +1,14 @@
 "use client";
 
-import Container from "@/components/container";
 import {
   WebLNProvider,
   useWebLNContext,
-} from "@/components/providers/webln-provider";
-import { Button } from "@/components/ui/button";
-import Icon from "@/components/ui/icon";
-import { Text } from "@/components/ui/text";
+  Button,
+  Icon,
+  Text,
+} from "@fedibtc/ui";
 import Swap from "./swap";
+import Container from "@/components/container";
 
 function Fallback() {
   const { isLoading, error } = useWebLNContext();
@@ -19,7 +19,7 @@ function Fallback() {
         <Icon
           icon="IconLoader2"
           size="xl"
-          className="animate-load text-lightGrey"
+          className="animate-spin text-lightGrey"
         />
         <Text>Initializing WebLN...</Text>
       </Container>

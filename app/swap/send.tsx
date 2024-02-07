@@ -1,18 +1,21 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Rate } from ".";
-import { useToast } from "@/components/ui/hooks/use-toast";
+import {
+  useToast,
+  Input,
+  Text,
+  Button,
+  Dialog,
+  Icon,
+  Scanner,
+  useWebLN,
+} from "@fedibtc/ui";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Token } from "@/lib/constants";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
-import Icon from "@/components/ui/icon";
-import { Dialog } from "@/components/ui/dialog";
-import Scanner from "@/components/ui/scanner";
 
 const FormSchema = z.object({
   amount: z.number().min(0),
@@ -31,6 +34,7 @@ export default function Send({
   const [scanning, setScanning] = useState(false);
   const { toast } = useToast();
 
+  const webln = useWebLN();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -70,28 +74,25 @@ export default function Send({
         });
       }
 
-      if (typeof window.webln !== "undefined") {
-        await window.webln.enable();
-        try {
-          const { preimage } = await window.webln.sendPayment(data.invoice);
+      try {
+        const { preimage } = await webln.sendPayment(data.invoice);
 
-          if (preimage) {
-            toast({
-              content: "Payment sent",
-              duration: 2500,
-            });
-          } else {
-            toast({
-              content: "The payment failed to go through",
-              duration: 2500,
-            });
-          }
-        } catch (err) {
+        if (preimage) {
           toast({
-            content: (err as any).message,
+            content: "Payment sent",
+            duration: 2500,
+          });
+        } else {
+          toast({
+            content: "The payment failed to go through",
             duration: 2500,
           });
         }
+      } catch (err) {
+        toast({
+          content: (err as any).message,
+          duration: 2500,
+        });
       }
     },
   });
@@ -107,7 +108,7 @@ export default function Send({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
-        className="flex flex-col gap-4 w-full grow items-stretch grow"
+        className="flex flex-col gap-4 w-full grow items-stretch"
       >
         <FormField
           control={form.control}
@@ -139,7 +140,7 @@ export default function Send({
               <FormLabel>Address</FormLabel>
               <div className="flex gap-sm">
                 <Button
-                  className="!p-sm rounded-sm w-xxl shrink-0 rounded-lg !border !border-lightGrey"
+                  className="!p-sm w-xxl shrink-0 rounded-lg !border !border-lightGrey"
                   variant="outline"
                   type="button"
                   onClick={() => setScanning(true)}
@@ -172,9 +173,7 @@ export default function Send({
 
         <div className="grow" />
 
-        <Button type="submit" loading={mutation.status === "pending"}>
-          Submit
-        </Button>
+        <Button loading={mutation.status === "pending"}>Submit</Button>
       </form>
     </Form>
   );

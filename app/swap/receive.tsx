@@ -1,19 +1,22 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Rate } from ".";
 import { Token } from "@/lib/constants";
-import { useToast } from "@/components/ui/hooks/use-toast";
+import {
+  useToast,
+  Dialog,
+  Icon,
+  Text,
+  Button,
+  Checkbox,
+  Input,
+  useWebLN,
+} from "@fedibtc/ui";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
-import { Dialog } from "@/components/ui/dialog";
-import Icon from "@/components/ui/icon";
-import { Text } from "@/components/ui/text";
 import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import QRCode from "react-qr-code";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 
 const FormSchema = z.object({
   amount: z.number().min(0),
@@ -32,6 +35,7 @@ export default function Receive({
   const [open, setOpen] = useState(false);
   const [invoiceUri, setInvoiceUri] = useState(false);
 
+  const webln = useWebLN();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -41,51 +45,47 @@ export default function Receive({
 
   const { mutate, status, data } = useMutation({
     mutationFn: async (data: z.infer<typeof FormSchema>) => {
-      if (typeof window.webln !== "undefined") {
-        await window.webln.enable();
+      const rates = await fetch(`/api/rate?from=${token}&to=BTC`).then((r) =>
+        r.json(),
+      );
 
-        const rates = await fetch(`/api/rate?from=${token}&to=BTC`).then((r) =>
-          r.json(),
-        );
+      if (rates) {
+        try {
+          const sats = +(data.amount * rates.data.from.rate).toFixed(7);
 
-        if (rates) {
-          try {
-            const sats = +(data.amount * rates.data.from.rate).toFixed(7);
+          const { paymentRequest } = await webln.makeInvoice({
+            amount: sats * 100000000,
+          });
 
-            const { paymentRequest } = await window.webln.makeInvoice({
-              amount: sats * 100000000,
-            });
+          const res = await fetch("/api/receive", {
+            method: "POST",
+            body: JSON.stringify({
+              from: token,
+              amount: sats,
+              address: paymentRequest,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }).then((r) => r.json());
 
-            const res = await fetch("/api/receive", {
-              method: "POST",
-              body: JSON.stringify({
-                from: token,
-                amount: sats,
-                address: paymentRequest,
-              }),
-              headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-              },
-            }).then((r) => r.json());
-
-            if (res.error) {
-              toast({
-                content: res.error,
-              });
-            } else {
-              setOpen(true);
-              setOrder({
-                id: res.data.id,
-                token: res.data.token,
-              });
-              return res;
-            }
-          } catch (e) {
+          if (res.error) {
             toast({
-              content: (e as any).message,
+              content: res.error,
             });
+          } else {
+            setOpen(true);
+            setOrder({
+              id: res.data.id,
+              token: res.data.token,
+            });
+            return res;
           }
+        } catch (e) {
+          toast({
+            content: (e as any).message,
+          });
         }
       }
     },
@@ -111,7 +111,7 @@ export default function Receive({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((data) => mutate(data))}
-          className="flex flex-col gap-4 w-full grow items-stretch grow"
+          className="flex flex-col gap-4 w-full grow items-stretch"
         >
           <FormField
             control={form.control}
@@ -137,10 +137,7 @@ export default function Receive({
 
           <div className="grow" />
 
-          <Button type="submit" loading={status === "pending"}>
-            {" "}
-            Submit
-          </Button>
+          <Button loading={status === "pending"}>Submit</Button>
         </form>
       </Form>
 
@@ -217,7 +214,7 @@ export default function Receive({
 
             <div className="flex gap-2 items-center w-full min-w-0">
               <Button
-                className="!p-sm rounded-sm w-xxl shrink-0 rounded-lg !border !border-lightGrey shrink-0"
+                className="!p-sm w-xxl rounded-lg !border !border-lightGrey shrink-0"
                 variant="outline"
                 onClick={() =>
                   copyText(
