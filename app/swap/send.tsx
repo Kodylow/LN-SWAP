@@ -32,7 +32,7 @@ export default function Send({
   token: Token;
 }) {
   const [scanning, setScanning] = useState(false);
-  const { toast } = useToast();
+  const toast = useToast();
 
   const webln = useWebLN();
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -59,10 +59,7 @@ export default function Send({
       }).then((r) => r.json());
 
       if (error) {
-        toast({
-          content: error,
-          duration: 2500,
-        });
+        toast.error(error);
 
         return;
       }
@@ -78,21 +75,18 @@ export default function Send({
         const { preimage } = await webln.sendPayment(data.invoice);
 
         if (preimage) {
-          toast({
+          toast.show({
             content: "Payment sent",
-            duration: 2500,
+            status: "success",
           });
         } else {
-          toast({
+          toast.show({
             content: "The payment failed to go through",
-            duration: 2500,
+            status: "error",
           });
         }
       } catch (err) {
-        toast({
-          content: (err as any).message,
-          duration: 2500,
-        });
+        toast.error(err);
       }
     },
   });

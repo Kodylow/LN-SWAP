@@ -1,5 +1,5 @@
 import QueryClientProvider from "@/components/providers/query-client-provider";
-import { Toaster } from "@fedibtc/ui";
+import { ToastProvider } from "@fedibtc/ui";
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import "@fedibtc/ui/dist/index.css";
@@ -22,8 +22,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <QueryClientProvider>
-          {children}
-          <Toaster />
+          <ToastProvider>{children}</ToastProvider>
         </QueryClientProvider>
         <Analytics />
       </body>

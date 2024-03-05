@@ -31,7 +31,7 @@ export default function Receive({
   setOrder: Dispatch<SetStateAction<{ token: string; id: string } | null>>;
   token: Token;
 }) {
-  const { toast } = useToast();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [invoiceUri, setInvoiceUri] = useState(false);
 
@@ -71,9 +71,7 @@ export default function Receive({
           }).then((r) => r.json());
 
           if (res.error) {
-            toast({
-              content: res.error,
-            });
+            toast.error(res.error);
           } else {
             setOpen(true);
             setOrder({
@@ -83,9 +81,7 @@ export default function Receive({
             return res;
           }
         } catch (e) {
-          toast({
-            content: (e as any).message,
-          });
+          toast.error(e);
         }
       }
     },
@@ -93,9 +89,9 @@ export default function Receive({
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      toast({
+      toast.show({
         content: "Copied!",
-        duration: 1500,
+        status: "success",
       });
     });
   };
