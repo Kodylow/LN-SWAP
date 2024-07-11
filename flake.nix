@@ -13,6 +13,9 @@
         devShells = {
           default = pkgs.mkShell {
             nativeBuildInputs = [ pkgs.bun pkgs.just pkgs.mprocs ];
+            shellHook = ''
+              bun install
+            '';
           };
         };
       });
